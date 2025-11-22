@@ -1,0 +1,76 @@
+<div class="json-compare-container">
+    <div class="toolbar" *ngIf="showHeaderToolbar">
+        <div class="file-control left-control">
+            <label class="input-label">{{ leftLabel }}</label>
+        </div>
+        <div class="view-switch" *ngIf="showViewSwitch">
+            <button type="button" class="option" [class.active]="viewMode === 'merged'" (click)="setView('merged')"
+                [disabled]="!bothPresent">{{ viewMergedLabel }}</button>
+            <button type="button" class="option" [class.active]="viewMode === 'split'" (click)="setView('split')"
+                [disabled]="!bothPresent">{{ viewSplitLabel }}</button>
+        </div>
+        <div class="file-control right-control">
+            <label class="input-label">{{ rightLabel }}</label>
+        </div>
+    </div>
+
+    <div class="compare-area" [ngClass]="viewMode">
+        <div class="merged-view" *ngIf="viewMode === 'merged'">
+            <ng-container *ngTemplateOutlet="nodeList; context: { $implicit: diffTree }"></ng-container>
+        </div>
+        <div class="split-view" *ngIf="viewMode === 'split'">
+            <div class="pane left-pane">
+                <ng-container
+                    *ngTemplateOutlet="nodeList; context: { $implicit: diffTree, mode: 'left' }"></ng-container>
+            </div>
+            <div class="pane right-pane">
+                <ng-container
+                    *ngTemplateOutlet="nodeList; context: { $implicit: diffTree, mode: 'right' }"></ng-container>
+            </div>
+        </div>
+    </div>
+    <div class="bottom-toolbar" *ngIf="showFooterToolbar">
+        <div *ngIf="showBrowseButtons" class="file-control left-control">
+            <input #leftFileInput class="visually-hidden" type="file" (change)="onFileSelected($event, 1)"
+                accept=".json" />
+            <button type="button" class="file-btn" (click)="leftFileInput.click()">{{ chooseFileLabel }}</button>
+        </div>
+        <div class="bottom-spacer"></div>
+        <div *ngIf="showBrowseButtons" class="file-control right-control">
+            <button type="button" class="file-btn" (click)="rightFileInput.click()">{{ chooseFileLabel }}</button>
+            <input #rightFileInput class="visually-hidden" type="file" (change)="onFileSelected($event, 2)"
+                accept=".json" />
+        </div>
+    </div>
+</div>
+
+<ng-template #nodeList let-nodes let-mode="mode">
+    <div class="node-list">
+        <div *ngFor="let node of nodes" class="node-item" [ngClass]="[getTypeClass(node), mode || '']">
+            <ng-container
+                *ngIf="!mode || (mode === 'left' && node.type !== 'add') || (mode === 'right' && node.type !== 'remove')">
+                <div class="node-content">
+                    <span class="toggle-icon" (click)="toggleNode(node)" *ngIf="node.children">
+                        {{ node.expanded ? '▼' : '▶' }}
+                    </span>
+                    <span class="spacer" *ngIf="!node.children"></span>
+                    <span class="key">{{ node.key }}:</span>
+                    <span class="value" *ngIf="!node.children">
+                        <ng-container *ngIf="node.type === 'modify'">
+                            <span class="old-value" *ngIf="!mode || mode === 'left'">{{ node.oldValue | json }}</span>
+                            <span class="arrow" *ngIf="!mode">→</span>
+                            <span class="new-value" *ngIf="!mode || mode === 'right'">{{ node.value | json }}</span>
+                        </ng-container>
+                        <ng-container *ngIf="node.type !== 'modify'">
+                            {{ node.value | json }}
+                        </ng-container>
+                    </span>
+                </div>
+                <div class="children" *ngIf="node.children && node.expanded">
+                    <ng-container *ngTemplateOutlet="nodeList; context: { $implicit: node.children, mode: mode }">
+                    </ng-container>
+                </div>
+            </ng-container>
+        </div>
+    </div>
+</ng-template>
