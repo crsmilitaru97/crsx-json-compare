@@ -1,6 +1,6 @@
 {
   "name": "@crsx/json-compare",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Angular component for visualizing JSON diffs",
   "author": "Cristian Militaru",
   "license": "ISC",
@@ -15,7 +15,11 @@
     "angular",
     "json",
     "diff",
-    "compare"
+    "compare",
+    "viewer",
+    "comparison",
+    "merge",
+    "visual-diff"
   ],
   "sideEffects": false,
   "peerDependencies": {
